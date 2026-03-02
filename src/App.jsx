@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { AuthProvider } from './context/AuthContext'
@@ -15,41 +15,46 @@ import QRScanner from './pages/QRScanner'
 import Stats from './pages/Stats'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
+import Payroll from './pages/Payroll'
 import Layout from './components/Layout'
 
 function AppContent() {
   // Hook anti-sommeil
   useKeepAlive()
 
+  const routes = [
+    { path: '/login', element: <Login /> },
+    { path: '/register', element: <Register /> },
+    {
+      path: '/',
+      element: (
+        <PrivateRoute>
+          <Layout />
+        </PrivateRoute>
+      ),
+      children: [
+        { index: true, element: <Welcome /> },
+        { path: 'welcome', element: <Welcome /> },
+        { path: 'dashboard', element: <Dashboard /> },
+        { path: 'services', element: <Services /> },
+        { path: 'employees', element: <Employees /> },
+        { path: 'payroll', element: <Payroll /> },
+        { path: 'profile', element: <Profile /> },
+        { path: 'attendance', element: <Attendance /> },
+        { path: 'qr-scanner', element: <QRScanner /> },
+        { path: 'stats', element: <Stats /> },
+        { path: 'settings', element: <Settings /> }
+      ]
+    },
+    { path: '*', element: <Navigate to="/login" replace /> }
+  ]
+
+  const router = createBrowserRouter(routes, {
+    future: { v7_startTransition: true, v7_relativeSplatPath: true }
+  })
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <Layout />
-              </PrivateRoute>
-            }
-          >
-            <Route index element={<Welcome />} />
-            <Route path="welcome" element={<Welcome />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="services" element={<Services />} />
-            <Route path="employees" element={<Employees />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="attendance" element={<Attendance />} />
-            <Route path="qr-scanner" element={<QRScanner />} />
-            <Route path="stats" element={<Stats />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-          {/* Route catch-all pour rediriger vers login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-        <ToastContainer position="top-right" autoClose={3000} />
-      </Router>
+    <RouterProvider router={router} />
   )
 }
 

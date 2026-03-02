@@ -16,6 +16,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    // Si data est FormData, laisser axios gérer le Content-Type (multipart/form-data)
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+    }
     return config
   },
   (error) => {
@@ -90,6 +94,14 @@ export const leaveService = {
 
 export const statsService = {
   getDashboard: () => api.get('/stats/dashboard')
+}
+
+export const payrollService = {
+  getAll: (params) => api.get('/payrolls', { params }),
+  getById: (id) => api.get(`/payrolls/${id}`),
+  create: (data) => api.post('/payrolls', data),
+  update: (id, data) => api.put(`/payrolls/${id}`, data),
+  delete: (id) => api.delete(`/payrolls/${id}`)
 }
 
 export const exportService = {

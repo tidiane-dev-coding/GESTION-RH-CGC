@@ -17,7 +17,7 @@ const Profile = () => {
   const [form, setForm] = useState({
     numero: '',
     matricule: '',
-    nom : '',
+    nom: '',
     poste: '',
     genre: 'Homme',
     dateNaissance: '',
@@ -36,18 +36,18 @@ const Profile = () => {
     if (!dateEmbauche) return '-'
     const today = dayjs()
     const hireDate = dayjs(dateEmbauche)
-    
+
     if (hireDate.isAfter(today)) return '0 an(s)'
-    
+
     const years = today.diff(hireDate, 'year')
     const months = today.diff(hireDate.add(years, 'year'), 'month')
     const days = today.diff(hireDate.add(years, 'year').add(months, 'month'), 'day')
-    
+
     const parts = []
     if (years > 0) parts.push(`${years} an${years > 1 ? 's' : ''}`)
     if (months > 0) parts.push(`${months} mois`)
     if (days > 0) parts.push(`${days} jour${days > 1 ? 's' : ''}`)
-    
+
     return parts.length > 0 ? parts.join(', ') : '0 an(s)'
   }
 
@@ -63,7 +63,7 @@ const Profile = () => {
           dateNaissance: res.data.dateNaissance ? dayjs(res.data.dateNaissance).format('YYYY-MM-DD') : '',
           dateEmbauche: res.data.dateEmbauche ? dayjs(res.data.dateEmbauche).format('YYYY-MM-DD') : ''
         })
-        
+
         // Charger l'historique des pointages (30 derniers jours)
         const endDate = dayjs().format('YYYY-MM-DD')
         const startDate = dayjs().subtract(30, 'days').format('YYYY-MM-DD')
@@ -117,7 +117,7 @@ const Profile = () => {
   return (
     <div className="relative min-h-screen w-full">
       {/* Image d'arrière-plan */}
-      <div 
+      <div
         className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80)',
@@ -134,7 +134,7 @@ const Profile = () => {
       <div className="relative z-10 min-h-screen w-full animate-fade-in-up p-6 sm:p-8">
         {/* En-tête */}
         <div className="mb-8 relative overflow-hidden rounded-2xl shadow-2xl">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage: 'url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80)',
@@ -212,22 +212,20 @@ const Profile = () => {
             <div className="flex">
               <button
                 onClick={() => setActiveTab('info')}
-                className={`flex-1 px-6 py-4 text-sm font-semibold transition-colors ${
-                  activeTab === 'info'
+                className={`flex-1 px-6 py-4 text-sm font-semibold transition-colors ${activeTab === 'info'
                     ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 📝 Informations
               </button>
               {employee && (
                 <button
                   onClick={() => setActiveTab('attendance')}
-                  className={`flex-1 px-6 py-4 text-sm font-semibold transition-colors ${
-                    activeTab === 'attendance'
+                  className={`flex-1 px-6 py-4 text-sm font-semibold transition-colors ${activeTab === 'attendance'
                       ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   📅 Pointages récents
                 </button>
@@ -241,46 +239,50 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Numéro *</label>
-                    <input required value={form.numero} onChange={(e) => setForm({...form, numero: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input required value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Matricule *</label>
-                    <input required value={form.matricule} onChange={(e) => setForm({...form, matricule: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input required value={form.matricule} onChange={(e) => setForm({ ...form, matricule: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Nom *</label>
-                    <input required value={form.nom} onChange={(e) => setForm({...form, nom: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Poste *</label>
-                    <input required value={form.poste} onChange={(e) => setForm({...form, poste: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input required value={form.poste} onChange={(e) => setForm({ ...form, poste: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Sexe *</label>
-                    <select value={form.genre} onChange={(e) => setForm({...form, genre: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select value={form.genre} onChange={(e) => setForm({ ...form, genre: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                       <option>Homme</option>
                       <option>Femme</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Date de naissance *</label>
-                    <input type="date" required value={form.dateNaissance} onChange={(e) => setForm({...form, dateNaissance: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input type="date" required value={form.dateNaissance} onChange={(e) => setForm({ ...form, dateNaissance: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Lieu de naissance *</label>
+                    <input required value={form.lieuNaissance || ''} onChange={(e) => setForm({ ...form, lieuNaissance: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Lieu de résidence *</label>
-                    <input required value={form.lieuResidence} onChange={(e) => setForm({...form, lieuResidence: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input required value={form.lieuResidence} onChange={(e) => setForm({ ...form, lieuResidence: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Nationalité *</label>
-                    <input required value={form.nationalite} onChange={(e) => setForm({...form, nationalite: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input required value={form.nationalite} onChange={(e) => setForm({ ...form, nationalite: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Date d'embauche</label>
-                    <input type="date" value={form.dateEmbauche} onChange={(e) => setForm({...form, dateEmbauche: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input type="date" value={form.dateEmbauche} onChange={(e) => setForm({ ...form, dateEmbauche: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Situation matrimoniale *</label>
-                    <select required value={form.situationMatrimoniale} onChange={(e) => setForm({...form, situationMatrimoniale: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select required value={form.situationMatrimoniale} onChange={(e) => setForm({ ...form, situationMatrimoniale: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                       <option>Célibataire</option>
                       <option>Marié(e)</option>
                       <option>Divorcé(e)</option>
@@ -289,11 +291,11 @@ const Profile = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre d'enfants</label>
-                    <input type="number" min="0" value={form.nombreEnfants} onChange={(e) => setForm({...form, nombreEnfants: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input type="number" min="0" value={form.nombreEnfants} onChange={(e) => setForm({ ...form, nombreEnfants: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Statut juridique *</label>
-                    <select required value={form.statutJuridique} onChange={(e) => setForm({...form, statutJuridique: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select required value={form.statutJuridique} onChange={(e) => setForm({ ...form, statutJuridique: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                       <option>Décret</option>
                       <option>Affecter</option>
                       <option>Détacher</option>
@@ -303,7 +305,7 @@ const Profile = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Filiation</label>
-                    <input value={form.filiation} onChange={(e) => setForm({...form, filiation: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input value={form.filiation} onChange={(e) => setForm({ ...form, filiation: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                 </div>
 
@@ -338,11 +340,10 @@ const Profile = () => {
                               )}
                             </div>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            attendance.statut === 'present' ? 'bg-green-100 text-green-700' :
-                            attendance.statut === 'absent' ? 'bg-red-100 text-red-700' :
-                            'bg-yellow-100 text-yellow-700'
-                          }`}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${attendance.statut === 'present' ? 'bg-green-100 text-green-700' :
+                              attendance.statut === 'absent' ? 'bg-red-100 text-red-700' :
+                                'bg-yellow-100 text-yellow-700'
+                            }`}>
                             {attendance.statut === 'present' ? 'Présent' : attendance.statut === 'absent' ? 'Absent' : 'Retard'}
                           </span>
                         </div>

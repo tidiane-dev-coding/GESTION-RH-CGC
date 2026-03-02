@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 const Settings = () => {
   const { user } = useAuth()
   const [showUsersSection, setShowUsersSection] = useState(false)
-  
+
   // États pour la gestion des utilisateurs
   const [users, setUsers] = useState([])
   const [services, setServices] = useState([])
@@ -55,7 +55,7 @@ const Settings = () => {
     if (!Array.isArray(services)) {
       return result
     }
-    
+
     services.forEach((service) => {
       const prefix = depth > 0 ? '  '.repeat(depth) + '└─ ' : ''
       const serviceName = service.nom || service.name || 'Sans nom'
@@ -64,12 +64,12 @@ const Settings = () => {
         displayName: prefix + serviceName,
         depth
       })
-      
+
       if (service.children && Array.isArray(service.children) && service.children.length > 0) {
         result = result.concat(flattenServices(service.children, depth + 1))
       }
     })
-    
+
     return result
   }
 
@@ -189,7 +189,7 @@ const Settings = () => {
   return (
     <div className="relative min-h-screen w-full">
       {/* Image d'arrière-plan */}
-      <div 
+      <div
         className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1920&q=80)',
@@ -316,22 +316,27 @@ const Settings = () => {
         )}
 
         {/* Liens vers les autres pages */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {settingsLinks.map((item) => (
             <Link
               key={item.name}
               to={item.href}
-              className="group relative overflow-hidden rounded-xl bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1"
+              className="group relative overflow-hidden rounded-xl bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-2xl p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 flex items-center sm:block"
             >
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300">
+              <div className="relative z-10 flex items-center sm:block w-full">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg bg-gray-100 flex items-center justify-center text-xl sm:text-2xl mr-4 sm:mr-0 sm:mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                   {item.icon}
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 mb-1">{item.name}</h2>
-                <p className="text-sm text-gray-600 mb-3">{item.description}</p>
-                <div className="mt-2 flex items-center text-gray-700 group-hover:text-gray-900 transition-colors font-medium">
-                  <span className="text-sm">Ouvrir la page</span>
-                  <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                <div className="flex-1">
+                  <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-0.5 sm:mb-1">{item.name}</h2>
+                  <p className="text-xs sm:text-sm text-gray-600 sm:mb-3 line-clamp-1 sm:line-clamp-none">{item.description}</p>
+                  <div className="hidden sm:flex mt-2 items-center text-gray-700 group-hover:text-gray-900 transition-colors font-medium">
+                    <span className="text-sm">Ouvrir la page</span>
+                    <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
+                </div>
+                <div className="sm:hidden text-gray-400">
+                  →
                 </div>
               </div>
             </Link>
