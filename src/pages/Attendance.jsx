@@ -33,14 +33,43 @@ const Attendance = () => {
     present: 0,
     absent: 0,
     averageHours: 0,
-    totalHours: 0
+    totalHours: 0,
+    lateCount: 0, // Nombre de retards
+    totalLateMinutes: 0 // Total des minutes de retard
   })
   const [myTodayAttendance, setMyTodayAttendance] = useState(null)
   const [showCameraModal, setShowCameraModal] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showLateModal, setShowLateModal] = useState(false)
+  const [lateForm, setLateForm] = useState({
+    attendanceId: '',
+    reason: '',
+    minutes: 0
+  })
+  const [lateProof, setLateProof] = useState(null)
+  const [lateProofName, setLateProofName] = useState('')
+  const EXPECTED_ARRIVAL_TIME = '08:00' // Heure d'arrivée attendue
+
+  // Refs pour la caméra
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
+
+  // Fonction pour calculer le retard en minutes
+  const calculateLateMinutes = (arrivalTime) => {
+    if (!arrivalTime) return 0
+    
+    const expected = dayjs(`${dayjs().format('YYYY-MM-DD')} ${EXPECTED_ARRIVAL_TIME}`)
+    const actual = dayjs(`${dayjs().format('YYYY-MM-DD')} ${arrivalTime}`)
+    
+    const diff = actual.diff(expected, 'minute')
+    return diff > 0 ? diff : 0
+  }
+
+  // Fonction pour déterminer si un employé est en retard
+  const isLate = (arrivalTime) => {
+    return calculateLateMinutes(arrivalTime) > 0
+  }
   
   // États pour les congés
   const [activeTab, setActiveTab] = useState('presences') // 'presences' ou 'conges'
@@ -154,12 +183,19 @@ const Attendance = () => {
         .reduce((sum, att) => sum + parseFloat(att.heuresTotales || 0), 0)
       const averageHours = present > 0 ? (totalHours / present).toFixed(1) : 0
       
+      // Calculer les statistiques de retard
+      const lateRecords = data.filter(att => isLate(att.heureArrivee))
+      const lateCount = lateRecords.length
+      const totalLateMinutes = lateRecords.reduce((sum, att) => sum + calculateLateMinutes(att.heureArrivee), 0)
+      
       setSummaryStats({
         total: data.length,
         present,
         absent,
         averageHours: parseFloat(averageHours),
-        totalHours: totalHours.toFixed(1)
+        totalHours: totalHours.toFixed(1),
+        lateCount,
+        totalLateMinutes
       })
     } catch (error) {
       toast.error('Erreur lors du chargement des présences')
@@ -726,7 +762,7 @@ const Attendance = () => {
       {/* Statistiques résumées - Affichées uniquement pour les présences */}
       {activeTab === 'presences' && (
       <>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-blue-500">
           <div className="text-sm text-gray-600 mb-1">Total</div>
           <div className="text-2xl font-bold text-gray-900">{summaryStats.total}</div>
@@ -738,6 +774,10 @@ const Attendance = () => {
         <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-red-500">
           <div className="text-sm text-gray-600 mb-1">Absents</div>
           <div className="text-2xl font-bold text-gray-900">{summaryStats.absent}</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-yellow-500">
+          <div className="text-sm text-gray-600 mb-1">En retard</div>
+          <div className="text-2xl font-bold text-gray-900">{summaryStats.lateCount}</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-purple-500">
           <div className="text-sm text-gray-600 mb-1">Moy. heures</div>
@@ -1091,6 +1131,7 @@ const Attendance = () => {
                   )}
                 </div>
               </th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Retard</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Statut</th>
               {user?.role === 'admin' && (
                 <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
@@ -1114,6 +1155,15 @@ const Attendance = () => {
                   <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">{att.heureArrivee ? dayjs(att.heureArrivee).format('HH:mm') : '-'}</td>
                   <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">{att.heureDepart ? dayjs(att.heureDepart).format('HH:mm') : '-'}</td>
                   <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{att.heuresTotales ? `${att.heuresTotales}h` : '-'}</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">
+                    {att.heureArrivee ? (
+                      <span className={`font-medium ${isLate(att.heureArrivee) ? 'text-red-600' : 'text-green-600'}`}>
+                        {isLate(att.heureArrivee) ? `${calculateLateMinutes(att.heureArrivee)} min` : 'À l\'heure'}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
                   <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs rounded-full font-medium ${
                       att.statut === 'present' ? 'bg-green-100 text-green-800 border border-green-200' :
@@ -1125,34 +1175,52 @@ const Attendance = () => {
                   </td>
                   {user?.role === 'admin' && (
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm" onClick={(e) => e.stopPropagation()}>
-                      {att.statut === 'absent' && (
-                        <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2">
+                        {isLate(att.heureArrivee) && (
                           <button
                             onClick={() => {
-                              setSelectedRecord(att)
-                              setShowEditModal(true)
+                              setLateForm({
+                                attendanceId: att._id,
+                                reason: '',
+                                minutes: calculateLateMinutes(att.heureArrivee)
+                              })
+                              setShowLateModal(true)
                             }}
-                            className="px-2 py-1 bg-gray-800 text-white rounded-lg text-xs hover:bg-gray-900 transition-all duration-200"
+                            className="px-2 py-1 bg-yellow-600 text-white rounded-lg text-xs hover:bg-yellow-700 transition-all duration-200"
+                            title="Justifier le retard"
                           >
-                            Modifier
+                            Justifier
                           </button>
-                          <button
-                            onClick={async () => {
-                              if (!window.confirm('Supprimer cette absence ?')) return
-                              try {
-                                await attendanceService.delete(att._id)
-                                toast.success('Absence supprimée')
-                                fetchAttendance()
-                              } catch (error) {
-                                toast.error(error.response?.data?.message || 'Erreur lors de la suppression')
-                              }
-                            }}
-                            className="px-2 py-1 bg-red-600 text-white rounded-lg text-xs hover:bg-red-700 transition-all duration-200"
-                          >
-                            Supprimer
-                          </button>
-                        </div>
-                      )}
+                        )}
+                        {att.statut === 'absent' && (
+                          <>
+                            <button
+                              onClick={() => {
+                                setSelectedRecord(att)
+                                setShowEditModal(true)
+                              }}
+                              className="px-2 py-1 bg-gray-800 text-white rounded-lg text-xs hover:bg-gray-900 transition-all duration-200"
+                            >
+                              Modifier
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!window.confirm('Supprimer cette absence ?')) return
+                                try {
+                                  await attendanceService.delete(att._id)
+                                  toast.success('Absence supprimée')
+                                  fetchAttendance()
+                                } catch (error) {
+                                  toast.error(error.response?.data?.message || 'Erreur lors de la suppression')
+                                }
+                              }}
+                              className="px-2 py-1 bg-red-600 text-white rounded-lg text-xs hover:bg-red-700 transition-all duration-200"
+                            >
+                              Supprimer
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   )}
                 </tr>
@@ -1938,6 +2006,88 @@ const Attendance = () => {
           )}
         </>
       )}
+
+      {/* Modal pour justifier un retard */}
+      {showLateModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Justifier un retard</h2>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                try {
+                  const payload = {
+                    attendanceId: lateForm.attendanceId,
+                    reason: lateForm.reason,
+                    minutes: lateForm.minutes,
+                    proof: lateProof || null
+                  }
+
+                  await attendanceService.justifyLate(payload)
+                  toast.success('Justification de retard enregistrée')
+                  setShowLateModal(false)
+                  setLateForm({ attendanceId: '', reason: '', minutes: 0 })
+                  setLateProof(null)
+                  setLateProofName('')
+                  fetchAttendance()
+                } catch (error) {
+                  toast.error(error.response?.data?.message || 'Erreur lors de la justification')
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Motif du retard *</label>
+                <textarea
+                  value={lateForm.reason}
+                  onChange={(e) => setLateForm({ ...lateForm, reason: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  placeholder="Expliquez le motif du retard..."
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Preuve (photo ou PDF)</label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files && e.target.files[0]
+                    if (!file) return
+                    setLateProofName(file.name)
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                      setLateProof(reader.result)
+                    }
+                    reader.readAsDataURL(file)
+                  }}
+                  className="w-full text-sm"
+                />
+                {lateProofName && <p className="text-xs text-gray-500 mt-1">Fichier sélectionné: {lateProofName}</p>}
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowLateModal(false)}
+                  className="px-4 py-2 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-medium"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium"
+                >
+                  Justifier le retard
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       </div>
     </div>
   )

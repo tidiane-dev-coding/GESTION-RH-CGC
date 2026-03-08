@@ -30,13 +30,15 @@ const Employees = () => {
     lieuResidence: '',
     nationalite: '',
     dateEmbauche: '',
+    dateFinContrat: '', // Nouveau champ pour les contrats temporaires
     filiation: '',
     situationMatrimoniale: 'Célibataire',
     nombreEnfants: 0,
     statutJuridique: 'CDI',
     niveauEtude: '',
     cadre: '',
-    service: ''
+    service: '',
+    typeContrat: 'permanent' // Nouveau champ: 'permanent', 'cdd', 'interim', 'stage'
   })
   const [selectedFile, setSelectedFile] = useState(null)
 
@@ -119,10 +121,12 @@ const Employees = () => {
       lieuResidence: '',
       nationalite: '',
       dateEmbauche: '',
+      dateFinContrat: '',
       filiation: '',
       situationMatrimoniale: 'Célibataire',
       nombreEnfants: 0,
       statutJuridique: 'CDI',
+      typeContrat: 'permanent',
       niveauEtude: '',
       cadre: '',
       service: ''
@@ -139,7 +143,9 @@ const Employees = () => {
       dateNaissance: dayjs(employee.dateNaissance).format('YYYY-MM-DD'),
       age: employee.dateNaissance ? dayjs().diff(dayjs(employee.dateNaissance), 'year') : '',
       dateEmbauche: employee.dateEmbauche ? dayjs(employee.dateEmbauche).format('YYYY-MM-DD') : '',
-      service: employee.service._id || employee.service
+      dateFinContrat: employee.dateFinContrat ? dayjs(employee.dateFinContrat).format('YYYY-MM-DD') : '',
+      service: employee.service._id || employee.service,
+      typeContrat: employee.typeContrat || 'permanent'
     })
     setSelectedFile(null)
     setShowModal(true)
@@ -309,6 +315,32 @@ const Employees = () => {
           </div>
         </div>
 
+        {/* Statistiques des employés */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-blue-500">
+            <div className="text-sm text-gray-600 mb-1">Total Employés</div>
+            <div className="text-2xl font-bold text-gray-900">{employees.length}</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-green-500">
+            <div className="text-sm text-gray-600 mb-1">Employés Permanents</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {employees.filter(emp => emp.typeContrat === 'permanent' || !emp.typeContrat).length}
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-orange-500">
+            <div className="text-sm text-gray-600 mb-1">Employés Temporaires</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {employees.filter(emp => ['cdd', 'interim', 'stage'].includes(emp.typeContrat)).length}
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-red-500">
+            <div className="text-sm text-gray-600 mb-1">Contrats à échéance</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {employees.filter(emp => emp.dateFinContrat && dayjs(emp.dateFinContrat).isBefore(dayjs().add(30, 'day'))).length}
+            </div>
+          </div>
+        </div>
+
         {/* Vue tableau pour écrans moyens et grands */}
         <div className="bg-white rounded-xl shadow-lg hidden md:block">
           <div className="overflow-x-auto">
@@ -330,6 +362,8 @@ const Employees = () => {
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Situation matrimoniale</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Enfants</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Statut juridique</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Type de contrat</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fin de contrat</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Niveau d'étude</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Catégorie professionnelle</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Filiation</th>
@@ -371,6 +405,37 @@ const Employees = () => {
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-sm text-gray-600">
                       {emp.statutJuridique || '-'}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm">
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                        emp.typeContrat === 'permanent' || !emp.typeContrat
+                          ? 'bg-green-100 text-green-800 border border-green-200'
+                          : emp.typeContrat === 'cdd'
+                          ? 'bg-orange-100 text-orange-800 border border-orange-200'
+                          : emp.typeContrat === 'interim'
+                          ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                          : emp.typeContrat === 'stage'
+                          ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                          : 'bg-gray-100 text-gray-800 border border-gray-200'
+                      }`}>
+                        {emp.typeContrat === 'permanent' || !emp.typeContrat ? 'Permanent' :
+                         emp.typeContrat === 'cdd' ? 'CDD' :
+                         emp.typeContrat === 'interim' ? 'Intérim' :
+                         emp.typeContrat === 'stage' ? 'Stage' : 'Non défini'}
+                      </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-600">
+                      {emp.dateFinContrat ? (
+                        <span className={`font-medium ${
+                          dayjs(emp.dateFinContrat).isBefore(dayjs().add(30, 'day')) 
+                            ? 'text-red-600' 
+                            : 'text-gray-900'
+                        }`}>
+                          {dayjs(emp.dateFinContrat).format('DD/MM/YYYY')}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-sm text-gray-600">
                       {emp.niveauEtude || '-'}
@@ -695,6 +760,26 @@ const Employees = () => {
                         <option key={s._id} value={s._id} className="bg-gray-800">{s.nom}</option>
                       ))}
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">Type de contrat *</label>
+                    <select value={formData.typeContrat} onChange={(e) => setFormData({ ...formData, typeContrat: e.target.value })} required className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm text-sm">
+                      <option value="permanent" className="bg-gray-800">Permanent (CDI)</option>
+                      <option value="cdd" className="bg-gray-800">CDD (Contrat à durée déterminée)</option>
+                      <option value="interim" className="bg-gray-800">Intérim</option>
+                      <option value="stage" className="bg-gray-800">Stage</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">Date de fin de contrat</label>
+                    <input 
+                      type="date" 
+                      value={formData.dateFinContrat} 
+                      onChange={(e) => setFormData({ ...formData, dateFinContrat: e.target.value })} 
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm text-sm"
+                      placeholder="Laissez vide pour contrat permanent"
+                    />
+                    <p className="text-xs text-white/60 mt-1">Requis pour CDD, Intérim et Stage</p>
                   </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-6">
